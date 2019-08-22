@@ -1,0 +1,24 @@
+<html>
+	<head>
+		<title>CHIP-8 Emulator</title>
+
+		<link rel="stylesheet" type="text/css" href="style.css" />
+	</head>
+	<body>
+		<canvas id="game-canvas" width="512" height="256"></canvas>
+		<span id="game-reg"></span>
+		<span id="game-ins"></span>
+		<br>
+		<button id="game-step" onclick="step()">Step</button>		
+		<button id="game-run" onclick="run()">Run</button>		
+		<button id="game-stop" onclick="stop()">Stop</button>
+		<div id="game-error"></div>
+
+
+		<p>
+			<div id="game-ram"></div>
+		</p>
+
+		<script src="index.js"></script>
+	</body>
+</html>

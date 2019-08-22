@@ -1,0 +1,48 @@
+#game-canvas {
+	border: 1px solid black;
+}
+
+.ram-pc {
+	color: white;
+	background-color: red;
+}
+
+.ram-i {
+	color: white;
+	background-color: blue;
+}
+
+.ram-sp {
+	color: white;
+	background-color: green;
+}
+
+#game-ram {
+	float: right;
+}
+
+#game-ins {
+	float: right;
+	width: 200px;
+}
+
+#game-ram, #game-ins, #game-reg {
+	border: 1px solid black;
+}
+
+#game-ram, #game-ins {
+	height: 200px;
+	overflow: auto;
+}
+
+#game-reg {
+	float: right;
+}
+
+#game-error {
+	color: red;
+}
+
+#game-ram, #game-reg {
+	overflow-wrap: break-word;
+}
