@@ -1,10 +1,15 @@
+body {
+	font-family: "Fira Code";
+	font-size: 14px;
+}
+
 #game-canvas {
 	border: 1px solid black;
 }
 
 .ram-pc {
 	color: white;
-	background-color: red;
+	background-color: #a00;
 }
 
 .ram-i {

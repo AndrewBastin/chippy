@@ -89,7 +89,7 @@ let CPU = {
 	// 16 Pseudo-registers corresponding to input keys
 	K: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 
-	// 16 8-bit data registers (Vf is used as a flag register)
+	// 16 8-bit data registers (VF is used as a flag register)
 	V: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 
 }
@@ -177,7 +177,7 @@ function getCPUOpsTable() {
 	const ld_i_addr = (inst) => () => {
 		const addr = getLow12FromWord(inst);
 
-		logInst(`LD I 0x${addr.toString(16)}`);
+		logInst(`LD I ${addr.toString(16)}h`);
 		CPU.I = addr;
 		
 		CPU.PC += 2;
@@ -187,7 +187,7 @@ function getCPUOpsTable() {
 	const jp_v0_nnn = (inst) => () => {
 		const nnn = getLow12FromWord(inst);
 
-		logInst(`JP V0, 0x${nnn.toString(16)}`);
+		logInst(`JP V0, ${nnn.toString(16)}h`);
 		CPU.PC = CPU.V0 + nnn;
 	}
 	
@@ -198,7 +198,7 @@ function getCPUOpsTable() {
 		pushWordToStack(CPU.PC + 2);
 		CPU.PC = addr;
 
-		logInst(`CALL 0x${addr.toString(16)}`);
+		logInst(`CALL ${addr.toString(16)}h`);
 	}
 	
 	// Loads an immediate 8bit value to VX (X=0,1,2,3,4,5,6,7,8,9,A,B,C,D,E,F)
@@ -209,7 +209,7 @@ function getCPUOpsTable() {
 		CPU.V[vx] = nn;
 		CPU.PC += 2;
 
-		logInst(`LD V${vx.toString(16)} 0x${nn.toString(16)}`);
+		logInst(`LD V${vx.toString(16)} ${nn.toString(16)}h`);
 	}
 	
 	// Returns from a subroutine
@@ -227,14 +227,14 @@ function getCPUOpsTable() {
 		CPU.V[vx] &= 255;
 
 		CPU.PC += 2;
-		logInst(`ADD V${vx.toString(16)} 0x${nn.toString(16)}`);
+		logInst(`ADD V${vx.toString(16)} ${nn.toString(16)}h`);
 	}
 
 	const jp_nnn = (inst) => () => {
 		const nnn = getLow12FromWord(inst);
 
 		CPU.PC = nnn;
-		logInst(`JP 0x${nnn.toString(16)}`);
+		logInst(`JP ${nnn.toString(16)}h`);
 	}
 	
 	// Draws a sprite (Vx, Vy) of width 8px and height N, sets flag if a set pixel is toggled, bitmap data is read from location I
@@ -265,7 +265,7 @@ function getCPUOpsTable() {
 
 		CPU.V[0xF] = flippedSetPixel ? 1 : 0;
 		CPU.PC += 2;
-		logInst(`DRW V${vx.toString(16)} V${vy.toString(16)} ${n}`);
+		logInst(`DRW V${vx.toString(16)} V${vy.toString(16)} ${n}h`);
 	}
 	
 	// Skips the next instruction if the value in register Vx is equal to the intermediate byte
@@ -279,7 +279,7 @@ function getCPUOpsTable() {
 		}
 
 		CPU.PC += 2;
-		logInst(`SE V${vx.toString(16)} 0x${nn.toString(16)}`);
+		logInst(`SE V${vx.toString(16)} ${nn.toString(16)}h`);
 	}
 	
 	// Clears the screen
@@ -312,7 +312,7 @@ function getCPUOpsTable() {
 		}
 
 		CPU.PC += 2;
-		logInst(`SNE V${x.toString(16)} 0x${nn.toString(16)}`);
+		logInst(`SNE V${x.toString(16)} ${nn.toString(16)}h`);
 	}
 	
 	// Combination of all the 8XXX series arithmetic ops
@@ -389,7 +389,7 @@ function getCPUOpsTable() {
 
 		CPU.PC += 2;
 
-		logInst(`RND V${vx.toString(16)} 0x${nn.toString(16)}`);
+		logInst(`RND V${vx.toString(16)} ${nn.toString(16)}h`);
 	}
 
 	// A grouped op function for all EXXX series CPU Opcodes
@@ -521,7 +521,7 @@ function getCPUOpsTable() {
 
 async function setup() {
 	
-	gameCart = new Uint8Array(await (await fetch("tetris.ch8")).arrayBuffer());
+	gameCart = new Uint8Array(await (await fetch("roms/spaceinvaders.ch8")).arrayBuffer());
 	
 	// Loads the hex sprites into RAM
 	RAM.set(sprites, 0x000);
@@ -603,15 +603,32 @@ function displayDebugData() {
 		Frame Time: ${stepTime}ms<br>
 		FPS: ${fps}<br>
 		<br>
-		PC: 0x${CPU.PC.toString(16)} SP: 0x${CPU.SP.toString(16)} I: 0x${CPU.I.toString(16)}<br>
+		<span class="ram-pc">PC: ${CPU.PC.toString(16)}h</span> <span class="ram-sp">SP: ${CPU.SP.toString(16)}h</span> <span class="ram-i">I: ${CPU.I.toString(16)}h</span><br>
 		TIME: ${CPU.TIME} TONE: ${CPU.TONE}<br>
 		K0: ${CPU.K[0x0]} K1: ${CPU.K[0x1]} K2: ${CPU.K[0x2]} K3: ${CPU.K[0x3]} K4: ${CPU.K[0x4]} K5: ${CPU.K[0x5]}
 		K6: ${CPU.K[0x6]} K7: ${CPU.K[0x7]} K8: ${CPU.K[0x8]} K9: ${CPU.K[0x9]} KA: ${CPU.K[0xa]} KB: ${CPU.K[0xb]}
 		KC: ${CPU.K[0xc]} KD: ${CPU.K[0xd]} KE: ${CPU.K[0xe]} KF: ${CPU.K[0xf]}<br>
 
-		V0: ${CPU.V[0x0]} V1: ${CPU.V[0x1]} V2: ${CPU.V[0x2]} V3: ${CPU.V[0x3]} V4: ${CPU.V[0x4]} V5: ${CPU.V[0x5]}
-		V6: ${CPU.V[0x6]} V7: ${CPU.V[0x7]} V8: ${CPU.V[0x8]} V9: ${CPU.V[0x9]} VA: ${CPU.V[0xa]} VB: ${CPU.V[0xb]}
-		VC: ${CPU.V[0xc]} VD: ${CPU.V[0xd]} VE: ${CPU.V[0xe]} VF: ${CPU.V[0xf]}<br>
+		<br>
+		<h4>Data Registers</h4>
+		V0: <span title="DEC: ${CPU.V[0x0]}">${CPU.V[0x0].toString(16)}h</span> 
+		V1: <span title="DEC: ${CPU.V[0x1]}">${CPU.V[0x1].toString(16)}h</span>
+		V2: <span title="DEC: ${CPU.V[0x2]}">${CPU.V[0x2].toString(16)}h</span>
+		V3: <span title="DEC: ${CPU.V[0x3]}">${CPU.V[0x3].toString(16)}h</span> 
+		V4: <span title="DEC: ${CPU.V[0x4]}">${CPU.V[0x4].toString(16)}h</span> 
+		V5: <span title="DEC: ${CPU.V[0x5]}">${CPU.V[0x5].toString(16)}h</span>
+		V6: <span title="DEC: ${CPU.V[0x6]}">${CPU.V[0x6].toString(16)}h</span> 
+		V7: <span title="DEC: ${CPU.V[0x7]}">${CPU.V[0x7].toString(16)}h</span>
+		V8: <span title="DEC: ${CPU.V[0x8]}">${CPU.V[0x8].toString(16)}h</span>
+		V9: <span title="DEC: ${CPU.V[0x9]}">${CPU.V[0x9].toString(16)}h</span>
+		VA: <span title="DEC: ${CPU.V[0xA]}">${CPU.V[0xa].toString(16)}h</span>
+		VB: <span title="DEC: ${CPU.V[0xB]}">${CPU.V[0xb].toString(16)}h</span>
+		VC: <span title="DEC: ${CPU.V[0xC]}">${CPU.V[0xc].toString(16)}h</span>
+		VD: <span title="DEC: ${CPU.V[0xD]}">${CPU.V[0xd].toString(16)}h</span>
+		VE: <span title="DEC: ${CPU.V[0xE]}">${CPU.V[0xe].toString(16)}h</span>
+		VF: <span title="DEC: ${CPU.V[0xF]}">${CPU.V[0xf].toString(16)}h</span>
+
+		<br>
 	`;
 
 	regLog.innerHTML = regStr;
@@ -619,12 +636,12 @@ function displayDebugData() {
 	let ramStr = "";
 	for (let i = 0; i < RAM.length; i++) {
 		if (i == CPU.PC || i == CPU.PC + 1) {
-			ramStr += `<span class='ram-pc'>${RAM[i].toString(16)}</span>  `;
+			ramStr += `<span title="Address: ${i.toString(16)}h, DEC: ${RAM[i]}" class='ram-pc'>${RAM[i].toString(16)}</span>  `;
 		} else if (i == CPU.I) {
-			ramStr += `<span class='ram-i'>${RAM[i].toString(16)}</span>  `
+			ramStr += `<span title="Address: ${i.toString(16)}h, DEC: ${RAM[i]}" class='ram-i'>${RAM[i].toString(16)}</span>  `
 		} else if (i == CPU.SP) {
-			ramStr += `<span class='ram-sp'>${RAM[i].toString(16)}</span>  `
-		} else ramStr += RAM[i].toString(16) + "  ";
+			ramStr += `<span title="Address: ${i.toString(16)}h, DEC: ${RAM[i]}" class='ram-sp'>${RAM[i].toString(16)}</span>  `
+		} else ramStr += `<span title="Address: ${i.toString(16)}h, DEC: ${RAM[i]}">${RAM[i].toString(16)}</span>   `;
 	}
 
 	ramLog.innerHTML = ramStr;
